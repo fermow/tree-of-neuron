@@ -3,7 +3,7 @@
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
 class Element {
   constructor(tag='div') {
-    this.tagName=tag.toUpperCase();this.children=[];this.listeners={};this.style={setProperty(){}};
+    this.tagName=tag.toUpperCase();this.children=[];this.dataset={};this.listeners={};this.style={setProperty(){}};
     this.classList={add(){},remove(){}};this.innerHTML='';this.textContent='';this.hidden=false;this.value='';this.checked=false;this.isConnected=true;
   }
   append(...items){this.children.push(...items);items.forEach(child=>{child.parentNode=this;});}
@@ -33,12 +33,13 @@ const context={
   history:{pushState(_a,_b,url){context.location.hash=url.includes('#')?url.slice(url.indexOf('#')):'';},replaceState(_a,_b,url){context.location.hash=url.includes('#')?url.slice(url.indexOf('#')):'';}},
   URLSearchParams,setTimeout:fn=>fn()
 };
-for (const file of ['data','research','terms','graph','visuals','media','explorer']) {
+for (const file of ['data','research','terms','graph','visuals','media','organic-layout','relations','explorer']) {
   vm.runInNewContext(fs.readFileSync('assets/'+file+'.js','utf8'),context,{filename:file+'.js'});
 }
 const data=context.window.NEURON_HISTORY,terms=context.window.NEURON_TERMS.items;
 assert.equal(elements.nodes.children.length,1,'Only root at startup');
 assert.equal(elements.routeList.children.length,6,'Six parallel paths');
+assert.equal(elements.journeyPanel.hidden,true,'Guided chronology begins closed');
 const root=elements.nodes.children[0];
 root.children.at(-1).children.at(-1).click();
 assert.equal(elements.nodes.children.filter(n=>n.className.includes('branch-node')).length,6);
@@ -77,4 +78,15 @@ for(const term of terms){
   assert.ok(context.window.NEURON_MEDIA.term(term.id),'Missing word history illustration '+term.id);
 }
 assert.equal(data.events.length,47);assert.equal(terms.length,16);
+elements.journeyLaunch.click();
+assert.equal(elements.journeyPanel.hidden,false,'Chronological guide opens');
+assert.equal(elements.journeyProgress.textContent,'1 / 47');
+elements.journeyNext.click();
+assert.equal(elements.journeyProgress.textContent,'2 / 47');
+elements.journeyBar.value=47;elements.journeyBar.dispatch('input');
+assert.equal(elements.journeyProgress.textContent,'47 / 47','All discoveries are reachable');
+assert.equal(elements.journeyNext.disabled,true,'Final step stops forward movement');
+elements.journeyExit.click();
+assert.equal(elements.journeyPanel.hidden,true,'Guide exits without deleting open paths');
+assert.ok(context.window.NEURON_RELATIONS.length>=25,'Scientific relationships loaded');
 console.log('Explorer checks passed: progressive paths, node stories, search, citations, 47 milestones, 16 word histories.');

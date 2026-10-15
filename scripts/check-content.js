@@ -2,7 +2,7 @@ const fs = require("node:fs");
 const vm = require("node:vm");
 
 const context = { window: {} };
-for (const file of ["assets/data.js", "assets/research.js", "assets/terms.js", "assets/graph.js", "assets/visuals.js"]) {
+for (const file of ["assets/data.js", "assets/research.js", "assets/terms.js", "assets/graph.js", "assets/visuals.js", "assets/media.js"]) {
   vm.runInNewContext(fs.readFileSync(file, "utf8"), context, { filename: file });
 }
 
@@ -28,7 +28,7 @@ for (const [index, event] of events.entries()) {
   }
   const root = { innerHTML: "", querySelector: () => null };
   const page = {
-    window: { NEURON_HISTORY: context.window.NEURON_HISTORY, NEURON_RESEARCH: research, NEURON_TERMS: terminology, NEURON_VISUALS: visuals, location: { search: `?id=${encodeURIComponent(event.id)}` } },
+    window: { NEURON_HISTORY: context.window.NEURON_HISTORY, NEURON_RESEARCH: research, NEURON_TERMS: terminology, NEURON_VISUALS: visuals, NEURON_GRAPH: graph, NEURON_MEDIA: context.window.NEURON_MEDIA, location: { search: `?id=${encodeURIComponent(event.id)}` } },
     document: { getElementById: () => root, documentElement: { style: { setProperty() {} } }, title: "" },
     URLSearchParams
   };

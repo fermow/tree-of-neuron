@@ -38,8 +38,9 @@
   const visible=Object.fromEntries(eras.map(e=>[e.id,0]));
   let branchesOpen=false,showTerms=false,showRelations=true,activePath=null,lastFocus=null;
   let journeyIndex=-1,modalId=null,selectedRelationId=null;
+  let journeyOverview=true;
   let camera={x:0,y:0,scale:1},pointerStart=null,pointers=new Map(),pinch=null;
-  const minZoom=.13,maxZoom=2.35;
+  const minZoom=.075,maxZoom=2.35;
   const cameraPoint=r=>L.center(r);
   const branchRect=id=>L.branch(branchIndex.get(id));
   const eventRect=event=>L.event(branchIndex.get(event.era),sorted.get(event.era).findIndex(e=>e.id===event.id));
@@ -58,15 +59,26 @@
     });
     return L.bounds(boxes);
   }
+  // Reserve UI margins when framing the canvas, not just its geometric center.
+  // This prevents discoveries from hiding behind the left navigation or tour dock.
+  function safeFrame(){
+    const r=viewport.getBoundingClientRect(),mobile=r.width<700;
+    const left=mobile?16:Math.min(300,Math.max(265,r.width*.19));
+    const right=mobile?16:40;
+    const top=mobile?80:92;
+    const bottom=journeyIndex>=0?(mobile?168:154):(mobile?170:60);
+    const w=Math.max(120,r.width-left-right),h=Math.max(120,r.height-top-bottom);
+    return {width:w,height:h,cx:left+w/2,cy:top+h/2};
+  }
   function transform(animate=false){
-    world.style.transition=animate?'transform 310ms cubic-bezier(.2,.85,.25,1)':'none';
+    world.style.transition=animate?'transform 450ms cubic-bezier(.19, .8, .22, 1)':'none';
     world.style.transform='translate3d('+camera.x+'px,'+camera.y+'px,0) scale('+camera.scale+')';
     zoomLabel.textContent=Math.round(camera.scale*100)+'%';
   }
   function centerOn(x,y,zoom,animate=true){
-    const r=viewport.getBoundingClientRect();
+    const f=safeFrame();
     camera.scale=Math.max(minZoom,Math.min(maxZoom,zoom));
-    camera.x=r.width/2-x*camera.scale;camera.y=r.height/2-y*camera.scale;
+    camera.x=f.cx-x*camera.scale;camera.y=f.cy-y*camera.scale;
     transform(animate);
   }
   function zoomAt(mult,clientX,clientY,smooth=true){
@@ -75,10 +87,37 @@
     const wx=(px-camera.x)/camera.scale,wy=(py-camera.y)/camera.scale;
     camera.scale=next;camera.x=px-wx*next;camera.y=py-wy*next;transform(smooth);
   }
+  function frameRects(rects,maxScale=1.06,animate=true){
+    const b=L.bounds(rects),f=safeFrame(),pad=28;
+    const scale=Math.min(maxScale,(f.width-pad*2)/(b.maxX-b.minX),(f.height-pad*2)/(b.maxY-b.minY));
+    centerOn((b.minX+b.maxX)/2,(b.minY+b.maxY)/2,Math.max(minZoom,scale),animate);
+  }
   function fit(){
-    const r=currentNodeBounds(),rect=viewport.getBoundingClientRect(),pad=120;
-    const scale=Math.min(1.07,(rect.width-pad)/(r.maxX-r.minX),(rect.height-pad)/(r.maxY-r.minY));
-    centerOn((r.minX+r.maxX)/2,(r.minY+r.maxY)/2,Math.max(minZoom,scale));
+    const b=currentNodeBounds();
+    frameRects([{x:b.minX,y:b.minY,w:b.maxX-b.minX,h:b.maxY-b.minY}],.99);
+  }
+  function overviewJourney(){
+    if(journeyIndex<0)return;
+    journeyOverview=true;
+    // Frame every currently revealed element. Orientation remains visible
+    // until the reader explicitly chooses Focus or continues the chronology.
+    const bounds=currentNodeBounds();
+    frameRects([{x:bounds.minX,y:bounds.minY,w:bounds.maxX-bounds.minX,h:bounds.maxY-bounds.minY}],.96);
+    updateJourneyView();
+  }
+  function focusJourney(){
+    if(journeyIndex<0)return;
+    journeyOverview=false;
+    const e=chronological[journeyIndex],index=sorted.get(e.era).findIndex(t=>t.id===e.id);
+    const parent=index===0?branchRect(e.era):L.event(branchIndex.get(e.era),index-1);
+    frameRects([eventRect(e),parent],1.12);
+    updateJourneyView();
+  }
+  function updateJourneyView(){
+    const label=document.getElementById('journeyViewStatus');
+    label.textContent=journeyOverview?'Tree overview':'Focused discovery';
+    document.getElementById('journeyOverview').setAttribute('aria-pressed',String(journeyOverview));
+    document.getElementById('journeyFocus').setAttribute('aria-pressed',String(!journeyOverview));
   }
   function curveBetween(a,b,side=0){
     const dx=b.x-a.x,dy=b.y-a.y,dist=Math.hypot(dx,dy)||1;
@@ -249,9 +288,10 @@
     status.textContent=n+' / '+events.length+' discoveries revealed';
   }
   function updateJourney(){
-    if(journeyIndex<0){journeyPanel.hidden=true;document.getElementById('journeyLaunch').setAttribute('aria-pressed','false');return;}
+    if(journeyIndex<0){journeyPanel.hidden=true;document.body.classList.remove('tour-active');document.getElementById('journeyLaunch').setAttribute('aria-pressed','false');return;}
     const e=chronological[journeyIndex];
     journeyPanel.hidden=false;
+    document.body.classList.add('tour-active');
     document.getElementById('journeyLaunch').setAttribute('aria-pressed','true');
     document.getElementById('journeyProgress').textContent=(journeyIndex+1)+' / '+chronological.length;
     document.getElementById('journeyCategory').textContent=names[e.era];
@@ -269,16 +309,18 @@
     document.getElementById('journeyBar').value=journeyIndex+1;
     document.getElementById('journeyPrevious').disabled=journeyIndex===0;
     document.getElementById('journeyNext').disabled=journeyIndex===chronological.length-1;
-    document.getElementById('journeyNext').textContent=journeyIndex===chronological.length-1?'Journey completed':'Next discovery →';
+    document.getElementById('journeyNext').textContent=journeyIndex===chronological.length-1?'Done ✓':'Next →';
+    updateJourneyView();
   }
-  function journeyGo(index){
+  function journeyGo(index,showOverview=false){
     if(index<0||index>=chronological.length)return;
-    journeyIndex=index;const e=chronological[index];
+    journeyIndex=index;journeyOverview=showOverview;const e=chronological[index];
     branchesOpen=true;activePath=e.era;
     chronological.slice(0,index+1).forEach(step=>{
       visible[step.era]=Math.max(visible[step.era],sorted.get(step.era).findIndex(n=>n.id===step.id)+1);
     });
-    render();updateJourney();focusRect(eventRect(e),.91);
+    render();updateJourney();
+    if(showOverview)overviewJourney();else focusJourney();
   }
   function showRelation(relation){
     selectedRelationId=relation.id;
@@ -442,14 +484,16 @@
   viewport.addEventListener('pointerup',pointerEnd);viewport.addEventListener('pointercancel',pointerEnd);
   document.getElementById('zoomIn').addEventListener('click',()=>{const r=viewport.getBoundingClientRect();zoomAt(1.2,r.left+r.width/2,r.top+r.height/2);});
   document.getElementById('zoomOut').addEventListener('click',()=>{const r=viewport.getBoundingClientRect();zoomAt(1/1.2,r.left+r.width/2,r.top+r.height/2);});
-  document.getElementById('fitView').addEventListener('click',fit);
+  document.getElementById('fitView').addEventListener('click',()=>{if(journeyIndex>=0)overviewJourney();else fit();});
   document.getElementById('startButton').addEventListener('click',()=>{if(!branchesOpen){branchesOpen=true;render();}centerOn(L.CENTER.x,L.CENTER.y,.62);});
   document.getElementById('resetButton').addEventListener('click',()=>{eras.forEach(e=>visible[e.id]=0);branchesOpen=false;activePath=null;journeyIndex=-1;selectedRelationId=null;relationInspector.hidden=true;updateJourney();render();centerOn(L.CENTER.x,L.CENTER.y,.94);});
   document.getElementById('termsToggle').addEventListener('change',e=>{showTerms=e.target.checked;render();});
-  document.getElementById('journeyLaunch').addEventListener('click',()=>journeyGo(0));
+  document.getElementById('journeyLaunch').addEventListener('click',()=>journeyGo(0,true));
   document.getElementById('journeyPrevious').addEventListener('click',()=>journeyGo(journeyIndex-1));
   document.getElementById('journeyNext').addEventListener('click',()=>journeyGo(journeyIndex+1));
   document.getElementById('journeyRead').addEventListener('click',()=>{if(journeyIndex>=0)openStory('event',chronological[journeyIndex].id);});
+  document.getElementById('journeyOverview').addEventListener('click',overviewJourney);
+  document.getElementById('journeyFocus').addEventListener('click',focusJourney);
   document.getElementById('journeyExit').addEventListener('click',()=>{journeyIndex=-1;updateJourney();render();});
   document.getElementById('journeyBar').addEventListener('input',e=>journeyGo(Number(e.target.value)-1));
   document.getElementById('relationsToggle').addEventListener('change',e=>{showRelations=e.target.checked;render();});
@@ -473,7 +517,7 @@
     if(e.key==='-'){const r=viewport.getBoundingClientRect();zoomAt(1/1.18,r.left+r.width/2,r.top+r.height/2);}
   });
   window.addEventListener('popstate',syncHash);window.addEventListener('hashchange',syncHash);
-  window.addEventListener('resize',()=>{if(!branchesOpen)centerOn(L.CENTER.x,L.CENTER.y,.9,false);});
+  window.addEventListener('resize',()=>{if(journeyIndex>=0){if(journeyOverview)overviewJourney();else focusJourney();}else if(!branchesOpen)centerOn(L.CENTER.x,L.CENTER.y,.9,false);});
   edgeLayer.setAttribute('width',String(worldWidth));edgeLayer.setAttribute('height',String(worldHeight));
   world.style.width=worldWidth+'px';world.style.height=worldHeight+'px';
   render();updateJourney();centerOn(L.CENTER.x,L.CENTER.y,.88,false);syncHash();

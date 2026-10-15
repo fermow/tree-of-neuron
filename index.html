@@ -4,11 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="description" content="Explore the history of the neuron in an interactive, source-backed knowledge graph. Unfold six parallel research paths, follow discoveries, and read the evidence behind each milestone.">
-  <meta name="theme-color" content="#f4f3ed">
+  <meta name="theme-color" content="#09141f">
   <title>Tree of Neuron — Explore the history of discovery</title>
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="assets/explorer.css?v=20261015">
   <link rel="stylesheet" href="assets/organic.css?v=20261015b">
+  <link rel="stylesheet" href="assets/refinement.css?v=20261015c">
 </head>
 <body>
   <a class="sr-only" href="#viewport">Skip to the interactive history</a>
@@ -53,19 +54,34 @@
         <p class="route-footnote">Solid lines follow a research thread. Dotted lines denote conceptual connections, not proven direct influence.</p>
       </div>
     </aside>
-    <aside id="journeyPanel" class="float-panel journey-panel" aria-label="Guided chronological journey" hidden>
-      <div class="journey-panel-head"><span class="panel-kicker">THE COMPLETE LEARNING ROUTE</span><button id="journeyExit" aria-label="Leave guided journey" type="button">×</button></div>
-      <div class="journey-step-count"><span id="journeyProgress">1 / 47</span><span id="journeyCategory">Ancient roots</span></div>
-      <input id="journeyBar" type="range" min="1" max="47" value="1" aria-label="Jump to a historical discovery">
-      <span id="journeyDate" class="journey-date">c. 700 BCE</span>
-      <h3 id="journeyTitle">The first ideas</h3>
-      <p>Follow the global chronology, including overlapping research across branches. A gold dotted line marks your next stop—not a causal claim.</p>
-      <p id="journeyEvidence" class="journey-evidence"></p>
-      <a id="journeyEvidenceLink" class="journey-evidence-link" href="#" target="_blank" rel="noopener noreferrer" hidden>Research evidence ↗</a>
-      <div class="journey-controls">
-        <button id="journeyPrevious" type="button" aria-label="Previous discovery">← Back</button>
-        <button id="journeyRead" type="button">Read research ↗</button>
-        <button id="journeyNext" type="button">Next discovery →</button>
+    <aside id="journeyPanel" class="journey-dock" aria-label="Chronological learning journey" hidden>
+      <div class="dock-primary">
+        <div class="dock-step">
+          <span id="journeyProgress" class="dock-counter">1 / 47</span>
+          <span id="journeyCategory" class="dock-path">Early ideas &amp; words</span>
+          <span id="journeyDate" class="dock-date">c. 700 BCE</span>
+          <h3 id="journeyTitle">The first ideas</h3>
+        </div>
+        <div class="dock-actions">
+          <button id="journeyPrevious" type="button" aria-label="Previous historical discovery">←</button>
+          <button id="journeyRead" type="button">Read story ↗</button>
+          <button id="journeyNext" type="button" aria-label="Next historical discovery">Next →</button>
+        </div>
+      </div>
+      <div class="dock-secondary">
+        <input id="journeyBar" type="range" min="1" max="47" value="1" aria-label="Select chronological discovery">
+        <span id="journeyViewStatus" class="dock-view-status">Overview</span>
+        <button id="journeyOverview" type="button" title="See the full research tree">Overview</button>
+        <button id="journeyFocus" type="button" title="Frame the current branch and discovery">Focus</button>
+        <details id="journeyDetails" class="dock-evidence">
+          <summary>Connections <span aria-hidden="true">⌃</span></summary>
+          <div class="dock-evidence-popover">
+            <strong>How this discovery connects</strong>
+            <p id="journeyEvidence">Research and chronological context.</p>
+            <a id="journeyEvidenceLink" href="#" target="_blank" rel="noopener noreferrer" hidden>Read source ↗</a>
+          </div>
+        </details>
+        <button id="journeyExit" type="button" class="dock-exit" aria-label="Exit the guided journey">×</button>
       </div>
     </aside>
     <aside id="relationInspector" class="float-panel relation-inspector" aria-label="Scientific relationship and evidence" hidden>
@@ -112,8 +128,8 @@
   <script src="assets/graph.js?v=20261010"></script>
   <script src="assets/visuals.js?v=20261010"></script>
   <script src="assets/media.js?v=20261010"></script>
-  <script src="assets/organic-layout.js?v=20261015b"></script>
+  <script src="assets/organic-layout.js?v=20261015c"></script>
   <script src="assets/relations.js?v=20261015b"></script>
-  <script src="assets/explorer.js?v=20261015b"></script>
+  <script src="assets/explorer.js?v=20261015c"></script>
 </body>
 </html>

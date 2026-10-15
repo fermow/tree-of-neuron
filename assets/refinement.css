@@ -1,0 +1,156 @@
+/* Journey composition and typography refinement, layered over organic.css.
+   Keep the knowledge graph and research data unchanged. */
+:root {--readable-title:#f8fcfa;--readable-body:#e5f0eb;--readable-sub:#c5dad0}
+.graph-world,.graph-node{ -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility }
+.graph-node{box-shadow:0 15px 35px #02080ebd,inset 0 1px 0 #ffffff13}
+.event-node{
+  width:322px;height:198px;padding:19px 20px 17px;border-radius:17px;
+  background:linear-gradient(145deg,#203943 0%,#172c36 100%);
+  border:1.6px solid #527a72;
+  box-shadow:0 14px 32px #010b12a8,inset 0 1px 0 #ffffff16;
+}
+.event-node:hover,.event-node:focus-visible{background:linear-gradient(145deg,#294a52,#1b3740)}
+.event-head{margin-bottom:11px}
+.event-year{font-size:12px;font-weight:700;color:#dfbc80}
+.event-number{color:#d2ddd9;font-size:11px;font-weight:600}
+.event-body{grid-template-columns:minmax(0,1fr) 76px;gap:12px;height:112px}
+.event-copy{min-width:0}
+.event-title{
+  font-family:'DM Sans',system-ui,sans-serif;font-size:15px;line-height:1.32;
+  font-weight:700;letter-spacing:0; color:var(--readable-title);
+  margin:0 0 7px;max-height:41px;-webkit-line-clamp:2;
+}
+.event-summary{
+  font-size:12px;line-height:1.45;font-weight:500;
+  letter-spacing:.02px;color:var(--readable-body);max-height:55px;
+  -webkit-line-clamp:3;margin:0;
+}
+.node-thumb{width:76px;height:96px;border-color:#5b7873;background:#2b3f44}
+.event-bottom{border-top:1px solid #506962;padding-top:8px}
+.event-person{font-size:10px;font-weight:600;color:var(--readable-sub)}
+.event-read{font-size:10px;color:#d8f8e3;font-weight:700}
+.continue-node{border-color:#75aa90!important;color:#f0fff4!important;background:#355e50!important}
+.continue-node:hover{background:#447864!important}
+.root-title{color:#fcfffc;font-size:34px;font-weight:400}
+.root-description{color:#e0efe7;font-size:12px;line-height:1.58}
+.node-kicker{color:#d1f7e2}
+.root-caption{color:#daf3e5}
+.branch-name{font-size:24px;color:#fbfffd}
+.branch-description{font-size:11.5px;color:#dfefe6;line-height:1.4}
+.node-count{color:#cde5d9}
+.branch-number{font-size:10px;color:#c6e6d0}
+.term-node small,.term-node span{color:#f1d7b7}
+.tour-active .canvas-heading{opacity:0;visibility:hidden;pointer-events:none}
+.tour-active .status-pill{color:#d5eee0}
+/* The learning controls are intentionally a low, horizontal dock,
+   not a second floating reading panel obscuring half of the graph. */
+.journey-dock{
+  position:absolute;z-index:47;
+  left:calc(50% + 118px);bottom:17px;
+  transform:translateX(-50%);
+  width:min(690px,calc(100% - 326px));
+  padding:11px 14px 10px;
+  border:1px solid #4d786d;border-radius:16px;
+  background:rgba(13,34,43,.97);
+  box-shadow:0 14px 55px #000a,0 0 0 1px #ffffff09;
+  backdrop-filter:blur(17px);
+  color:#f5fbf7;
+}
+.dock-primary{display:flex;align-items:center;justify-content:space-between;gap:18px;min-width:0}
+.dock-step{min-width:0;flex:1}
+.dock-counter{
+  font-size:11px;font-weight:800;color:#f6d192;font-variant-numeric:tabular-nums;
+  white-space:nowrap;margin-right:10px;
+}
+.dock-path{font-size:10px;font-weight:600;color:#aee2c7;white-space:nowrap}
+.dock-date{font-size:10px;color:#c4d5cd;white-space:nowrap;margin-left:10px}
+.dock-step h3{
+  font-family:'DM Sans',system-ui,sans-serif;font-size:14px;font-weight:700;
+  letter-spacing:-.15px;line-height:1.25;
+  color:#fafefa;margin:7px 0 0;max-width:330px;
+  overflow:hidden;white-space:nowrap;text-overflow:ellipsis;
+}
+.dock-actions{display:flex;align-items:center;gap:7px;flex:none}
+.dock-actions button{
+  height:34px;min-width:34px;padding:0 10px;
+  border-radius:8px;border:1px solid #506e65;
+  background:#263f40;color:#e6f6eb;
+  font-size:11px;font-weight:700;
+}
+.dock-actions button:hover{background:#33554a;border-color:#8fbfa6}
+.dock-actions button:disabled{opacity:.34;cursor:not-allowed}
+.dock-actions #journeyRead{background:#b1e5c6;color:#12332e;border-color:#b1e5c6}
+.dock-actions #journeyRead:hover{background:#d8f8e3}
+.dock-actions #journeyNext{background:#385d4d;border-color:#608979}
+.dock-secondary{
+  display:flex;align-items:center;gap:10px;margin-top:10px;
+  border-top:1px solid #34554e;padding-top:9px;
+  min-height:29px;
+}
+#journeyBar{
+  width:100%;flex:1;min-width:55px;height:12px;cursor:pointer;
+  accent-color:#e9c48e;background:transparent;margin:0;
+}
+.dock-view-status{
+  font-size:9px;letter-spacing:.25px;color:#c2dacf;white-space:nowrap;min-width:91px;
+}
+.dock-secondary>button{
+  flex:none;border:1px solid transparent;border-radius:5px;
+  padding:4px 6px;color:#e2f1e8;background:transparent;font-size:10px;font-weight:600;
+  white-space:nowrap;
+}
+.dock-secondary>button:hover,.dock-secondary>button[aria-pressed=true]{
+  color:#d0f8e1;background:#2a4f43;
+}
+.dock-secondary .dock-exit{font-size:20px;color:#d2e2d8;padding:0 4px;line-height:1}
+.dock-evidence{position:relative;flex:none}
+.dock-evidence summary{
+  cursor:pointer;font-size:10px;font-weight:600;color:#d9efdf;
+  white-space:nowrap;padding:5px 3px;list-style:none;
+}
+.dock-evidence summary::-webkit-details-marker{display:none}
+.dock-evidence summary span{font-size:12px;color:#9ecaaf}
+.dock-evidence[open] summary{color:#e1cba1}
+.dock-evidence-popover{
+  position:absolute;bottom:calc(100% + 18px);right:-43px;
+  width:min(338px,calc(100vw - 30px));max-height:224px;overflow:auto;
+  border:1px solid #598074;border-radius:12px;
+  background:#16343d;box-shadow:0 18px 40px #000a;
+  padding:16px;z-index:52;
+}
+.dock-evidence-popover strong{font-size:12px;color:#f2faf4}
+.dock-evidence-popover p{font-size:12px;color:#d6e7dc;line-height:1.75;margin:9px 0;text-align:justify}
+.dock-evidence-popover a{font-size:11px;font-weight:700;color:#bdeac9}
+.dock-secondary .dock-exit:hover{color:white}
+.journey-dock:focus-within{border-color:#72a78d}
+@media(max-width:1000px){
+  .journey-dock{left:calc(50% + 105px);width:calc(100% - 272px);padding:10px 11px}
+  .dock-step h3{font-size:13px;max-width:240px}
+  .dock-date{display:none}
+  .dock-actions{gap:4px}
+  .dock-actions button{padding-inline:7px}
+  .dock-secondary{gap:6px}
+}
+@media(max-width:700px){
+  .tour-active .route-panel{display:none}
+  .tour-active .canvas-heading{display:none}
+  .journey-dock{
+    width:calc(100% - 22px);left:50%;bottom:12px;
+    padding:10px 11px;border-radius:13px;
+  }
+  .dock-primary{gap:8px}
+  .dock-step h3{font-size:12px;max-width:170px}
+  .dock-path{display:none}
+  .dock-counter{font-size:10px}
+  .dock-actions button{min-width:27px;height:31px;font-size:10px;padding:0 7px}
+  .dock-actions #journeyRead{max-width:65px}
+  .dock-secondary{gap:4px}
+  .dock-view-status{display:none}
+  .dock-secondary>button{font-size:9px;padding:3px 4px}
+  .dock-evidence summary{font-size:9px}
+  .dock-evidence-popover{right:-36px}
+  .canvas-footer{bottom:146px;max-width:100%;left:10px}
+  .canvas-tools{bottom:146px;right:10px}
+  .tour-active .canvas-footer .instruction{display:none}
+}
+@media(prefers-reduced-motion:reduce){.graph-world{transition:none!important}}

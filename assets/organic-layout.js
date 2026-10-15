@@ -4,7 +4,7 @@
 (() => {
   const CENTER={x:6900,y:6900};
   const ROOT={x:CENTER.x-150,y:CENTER.y-150,w:300,h:300};
-  const BW=232,BH=232,EW=284,EH=178;
+  const BW=232,BH=232,EW=322,EH=198;
   const angles=[-166,-109,-52,11,75,143].map(a=>a*Math.PI/180);
   const spread=[-1,1,-1,1,1,-1];
   const polar=(r,a)=>({x:CENTER.x+r*Math.cos(a),y:CENTER.y+r*Math.sin(a)});

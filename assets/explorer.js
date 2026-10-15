@@ -40,7 +40,7 @@
   let journeyIndex=-1,modalId=null,selectedRelationId=null;
   let journeyOverview=true;
   let camera={x:0,y:0,scale:1},pointerStart=null,pointers=new Map(),pinch=null;
-  const minZoom=.13,maxZoom=2.35;
+  const minZoom=.075,maxZoom=2.35;
   const cameraPoint=r=>L.center(r);
   const branchRect=id=>L.branch(branchIndex.get(id));
   const eventRect=event=>L.event(branchIndex.get(event.era),sorted.get(event.era).findIndex(e=>e.id===event.id));
@@ -99,10 +99,10 @@
   function overviewJourney(){
     if(journeyIndex<0)return;
     journeyOverview=true;
-    // The orientation view deliberately frames the root, all six fields, and
-    // the active milestone. It remains on screen until the user chooses focus.
-    const e=chronological[journeyIndex];
-    frameRects([L.ROOT,...eras.map((_,i)=>L.branch(i)),eventRect(e)],.96);
+    // Frame every currently revealed element. Orientation remains visible
+    // until the reader explicitly chooses Focus or continues the chronology.
+    const bounds=currentNodeBounds();
+    frameRects([{x:bounds.minX,y:bounds.minY,w:bounds.maxX-bounds.minX,h:bounds.maxY-bounds.minY}],.96);
     updateJourneyView();
   }
   function focusJourney(){

@@ -1,62 +1,57 @@
 # Tree of Neuron
 
-An interactive, source-backed history of how the modern neuron concept emerged - from the ancient Greek word *neûron* to the Hodgkin-Huxley ionic model of the action potential.
+**A visual, explorable history of the neuron.** Begin from one root node and unfold six parallel research paths. Each milestone opens a floating research story with archival imagery, experimental evidence, limitations and linked publications.
 
-## Live website
+## Live website — unchanged address
 
-**[Open the public Tree of Neuron atlas](https://fermow.github.io/tree-of-neuron/)**
+**https://fermow.github.io/tree-of-neuron/**
 
-The site is hosted free with GitHub Pages. Every push to `main` is published automatically by the workflow in `.github/workflows/pages.yml`.
+GitHub Pages continues to deploy from the main branch using [.github/workflows/pages.yml](.github/workflows/pages.yml). No server, package installation or new deployment destination is required. Standalone event and term links are retained.
+
+## How to explore
+
+- **Root node:** click the card or its plus button to reveal six main research branches.
+- **Parallel paths:** early ideas, anatomy, bioelectricity, neuron doctrine, myelin, and membranes / ions.
+- **Progressive chronology:** open a branch to reveal its first two dated discoveries. Click the plus on the last milestone to reveal the next one.
+- **Floating research reader:** click a discovery to read historical context, question, experiment, observations, interpretation, scientific limits and sources without leaving the graph.
+- **Credited illustrations:** each event has an image thumbnail and a larger image with description, type, credit, and Commons provenance / reuse-terms link. Modern diagrams are explicitly distinguished from historical illustrations.
+- **Traceable academic sources:** references link to DOI records, journals, archival works and historical research. Linked sources do not by themselves prove every scientific or historical claim has been independently audited.
+- **Word histories:** turn on etymology to explore 16 linked terminology nodes and their origin stories.
+- **Navigation:** drag to pan, zoom with the plus / minus controls or Ctrl + scroll, press Fit view to see all visible nodes, press / for search and Esc to close a story. Mobile touch dragging is supported.
+- **Shareable links:** the floating story has a stable URL hash; the pre-existing standalone articles remain accessible.
+- **Conceptual accuracy:** dotted cross-thread links represent *related evidence*, not an unsupported assertion of direct personal influence.
+
+## Project structure
+
+The project remains buildless: vanilla HTML, CSS, SVG and JavaScript.
+
+| File | Role |
+| --- | --- |
+| [index.html](index.html) | Full-screen interactive graph |
+| [assets/explorer.js](assets/explorer.js) | Expansion, pan/zoom, search and floating reader |
+| [assets/explorer.css](assets/explorer.css) | Responsive minimal UI |
+| [assets/data.js](assets/data.js) | 47 historical milestones and references |
+| [assets/research.js](assets/research.js) | Evidence-focused historical interpretation |
+| [assets/terms.js](assets/terms.js) | 16 word histories |
+| [assets/graph.js](assets/graph.js) | Research links and cross-thread relationships |
+| [assets/media.js](assets/media.js) | Media captions, attribution and Commons links |
+| [IMAGE_SOURCES.md](IMAGE_SOURCES.md) | Image provenance catalogue |
+| [event.html](event.html) and [term.html](term.html) | Preserved standalone pages |
 
 ## Run locally
 
-Requirements: Python 3 and Make.
+Requirements: Python 3 and Make; Node.js for running validation.
 
-```bash
+```sh
 git clone https://github.com/fermow/tree-of-neuron.git
 cd tree-of-neuron
 make up
+# In another shell: make check
 ```
 
-Open [http://127.0.0.1:8989](http://127.0.0.1:8989).
+The checks validate the existing corpus, 63 detail pages, source links and new graph interactions. Automated checks do not replace browser visual QA or manual fact-checking of the linked publications.
 
-Use another port if needed:
-
-```bash
-PORT=9000 make up
-```
-
-## Explore the atlas
-
-The homepage is a scrollable illustrated reading experience, designed for laptop trackpads, phones and keyboards.
-
-- **Timeline:** 47 chronological event cards, grouped into six historical periods.
-- **Parallel paths:** research columns within each period, plus three explicit meeting points (Galvani, Bernstein and propagation by 1952).
-- **Word origins:** 16 illustrated terminology histories with documented and approximate dates distinguished.
-- Search names, years, titles, research questions and concepts. Use `/` to focus search.
-- Combine historical-period, research-thread and milestone-type filters.
-- Choose the **12-stop essential journey** for a first reading; all other stories remain available.
-- Every event and term has a credited image, a dedicated reading page and references. Some related stories share an appropriate image.
-- Detail pages include section navigation, previous/next stories, and related research connections.
-- Recently opened stories and a continue-reading link are saved in browser-local storage. No account or tracking service is needed.
-- Images load online from Wikimedia Commons. An image-source link remains available if an image fails. All text and teaching sketches are local.
-
-To update an existing clone:
-
-```bash
-git pull
-make up
-```
-
-The page assets use versioned URLs to avoid stale browser caches after this redesign. No runtime packages or build step are needed.
-
-## Content architecture
-
-Historical content lives in `assets/data.js`, research explanations in `assets/research.js`, and word histories in `assets/terms.js`. `assets/atlas.js` renders the chronological index, filters and parallel views; `assets/atlas.css` styles the homepage. The reading pages share `assets/reader.css` and `assets/reader.js`.
-
-`assets/graph.js` preserves the research relationships, including branching and convergence. Connections relate evidence and questions; they are not proof of direct personal influence. The earlier pan-and-zoom renderer remains in `assets/tree.js` for reference but is not loaded by the reading-first homepage.
-
-Curated image assignments and captions are in `assets/media.js`, extending `assets/visuals.js`. Every image links to its Commons description page for provenance and reuse terms. The catalogue is in [IMAGE_SOURCES.md](IMAGE_SOURCES.md). Captions distinguish original apparatus, later portraits, micrographs and modern explanatory diagrams. Images are not represented as evidence of a naming date or as a different investigator’s original experiment.
+## Editorial and scientific notes
 
 The supplied PDFs are the core source corpus, supplemented where needed by linked historical scholarship and primary works. The pre-Galvani context, Galvani's 1780 laboratory program, and the 1781 distant-spark account rely especially on Piccolino's historical study and Galvani's 1791 publication. The PDFs are not duplicated in this repository; detail pages identify relevant PDF pages where applicable and link the cited primary and secondary references. The extra research notes are in [`assets/research.js`](assets/research.js). A historical reconstruction or summarized evidence sequence is not a complete laboratory replication protocol. Confidence statements distinguish support for a narrow observation from support for a broader historical model; they are qualitative, not numerical probabilities.
 
@@ -70,12 +65,7 @@ Bernstein's differential rheotome study (1868) and membrane hypothesis (1902) ar
 
 The myelin strand follows Virchow's 1854 name, Ranvier's gaps, Thudichum's chemical investigation, Schmitt's diffraction evidence, Tasaki's 1939 node-based findings, Huxley and Stämpfli's 1949 test, and a separate 1952 study by Hodler, Stämpfli and Tasaki. Parallel glial work identifies oligodendrocytes before their central-myelin role was demonstrated. Electron microscopy by Ben Geren (1954) and Bunge, Bunge and Pappas (1962) traces peripheral and central myelin origins respectively. The 1952 Hodgkin–Huxley squid-axon model and saltatory conduction in myelinated peripheral fibers are complementary findings from distinct preparations. Four dedicated word-history nodes distinguish earlier medullary terms, the 1854 name *myelin*, Ranvier's eponym and saltatory conduction.
 
-## Validation
 
-```bash
-make check
-```
+## Validation and deployment
 
-Checks cover all 63 detail pages and image assignments, reference integrity, chronology, search, combined filters, parallel views, deep links, and the essential journey. They do not test remote image delivery or replace visual browser QA.
-
-The project is intentionally buildless: plain HTML, CSS, SVG, and JavaScript.
+The [validation workflow](.github/workflows/checks.yml) runs the Node.js checks on updates and pull requests. The [GitHub Pages workflow](.github/workflows/pages.yml) publishes the same website address whenever main is updated.

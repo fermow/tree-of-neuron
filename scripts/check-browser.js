@@ -46,6 +46,38 @@ fs.mkdirSync(screenshots,{recursive:true});
    await page.locator('#journeyLaunch').click();
    assert.equal(await page.locator('#journeyPanel:not([hidden])').count(),1,'Journey launches');
    assert.equal((await page.locator('#journeyProgress').innerText()).trim(),'1 / 47');
+   // The tour must start with an unoccluded overview that fits all
+   // currently revealed discoveries, instead of zooming straight to one card.
+   await page.waitForTimeout(520);
+   const orientation=await page.evaluate(()=>{
+     const viewport=document.getElementById('viewport').getBoundingClientRect();
+     const dock=document.getElementById('journeyPanel').getBoundingClientRect();
+     const guide=document.querySelector('.route-panel').getBoundingClientRect();
+     const mobile=viewport.width<700;
+     const rects=[...document.querySelectorAll('.graph-node')].map(el=>el.getBoundingClientRect());
+     const left=mobile?viewport.left+10:guide.right+7;
+     return {view:document.getElementById('journeyViewStatus').textContent,
+       dockHeight:dock.height,dockWidth:dock.width,
+       overlaps:rects.filter(r=>r.left<left-3||r.right>viewport.right-8||r.top<viewport.top+20||r.bottom>dock.top-9).length,
+       dockSide:dock.left>viewport.left,dockWithin:dock.right<=viewport.right+2,
+       nodes:rects.length};
+   });
+   assert.equal(orientation.view,'Tree overview');
+   assert.equal(orientation.overlaps,0,'All revealed nodes must fit without being obscured: '+JSON.stringify(orientation));
+   assert.ok(orientation.dockHeight<164,'Tour controller remains compact: '+JSON.stringify(orientation));
+   assert.ok(orientation.dockSide&&orientation.dockWithin,'Dock stays within viewport');
+   await page.screenshot({path:path.join(screenshots,label+'-guided-overview.png'),animations:'disabled'});
+   await page.locator('#journeyFocus').click();
+   assert.equal((await page.locator('#journeyViewStatus').innerText()).trim(),'Focused discovery');
+   const typography=await page.locator('.event-node.journey-current').evaluate(node=>{
+     const t=getComputedStyle(node.querySelector('.event-title'));
+     const s=getComputedStyle(node.querySelector('.event-summary'));
+     return {title:parseFloat(t.fontSize),summary:parseFloat(s.fontSize),weight:parseInt(s.fontWeight)};
+   });
+   assert.ok(typography.title>=15 && typography.summary>=12 && typography.weight>=500,'Discoveries must have readable typography');
+   await page.screenshot({path:path.join(screenshots,label+'-guided-focus.png'),animations:'disabled'});
+   await page.locator('#journeyOverview').click();
+   assert.equal((await page.locator('#journeyViewStatus').innerText()).trim(),'Tree overview');
    await page.locator('#journeyNext').click();
    assert.equal((await page.locator('#journeyProgress').innerText()).trim(),'2 / 47');
    // Advance all historical stages; this must reveal every original milestone

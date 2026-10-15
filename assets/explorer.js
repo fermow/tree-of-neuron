@@ -306,14 +306,22 @@
   function closeStory(changeUrl=true) {
     if(modal.hidden)return;
     modal.hidden=true;modalId=null;document.body.classList.remove('modal-open');
-    if(changeUrl && location.hash)history.pushState({},'',location.pathname+location.search);
+    if(changeUrl && location.hash)history.replaceState({},'',location.pathname+location.search);
     if(lastFocus&&lastFocus.isConnected)lastFocus.focus();
   }
   function syncHash() {
-    const hash=decodeURIComponent(location.hash.slice(1));
-    if(hash.startsWith('event:')&&eventsById.has(hash.slice(6)))openStory('event',hash.slice(6),true);
-    else if(hash.startsWith('term:')&&termsById.has(hash.slice(5)))openStory('term',hash.slice(5),true);
-    else closeStory(false);
+    let hash='';
+    try { hash=decodeURIComponent(location.hash.slice(1)); } catch (_) { closeStory(false);return; }
+    const legacyEvent=hash.startsWith('event-')&&eventsById.has(hash.slice(6));
+    const legacyTerm=hash.startsWith('term-')&&termsById.has(hash.slice(5));
+    const type=hash.startsWith('event:')||legacyEvent?'event':hash.startsWith('term:')||legacyTerm?'term':null;
+    const id=type?hash.slice(6):null;
+    if(type && (type==='event'?eventsById:termsById).has(id)) {
+      const entry=type==='event'?eventsById.get(id):termsById.get(id);
+      const node=type==='event'?entry:eventsById.get(entry.anchor);
+      if(!branchesOpen||!visible[node.era])jumpTo(type,id,false);
+      openStory(type,id,true);
+    } else closeStory(false);
   }
   function searchMatches(value) {
     const term=value.trim().toLocaleLowerCase();if(!term)return [];

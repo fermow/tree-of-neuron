@@ -16,7 +16,7 @@
   const blurbs = {roots:'Where did the concept of the nerve begin?',anatomy:'How did anatomy reveal its structure?',electricity:'What makes nerves and muscles respond?',cell:'How did separate neurons become visible?',myelin:'How do impulses travel so quickly?',ions:'What produces the electrical spike?'};
   const ROW = 314, FIRST_Y = 170, ROOT = {x:120,y:FIRST_Y+ROW*2.5-85,w:304,h:184};
   const BX = 620, BW = 286, BH = 163, EX = 1040, EW = 292, EH = 180, STEP = 352;
-  const worldWidth = 20500, worldHeight = 1980;
+  const worldWidth = 20500, worldHeight = 2260;
   const viewport = document.getElementById('viewport');
   const world = document.getElementById('world');
   const edgeLayer = document.getElementById('edges');
@@ -100,6 +100,7 @@
     nodeLayer.replaceChildren();edgeLayer.replaceChildren();
     const root=card('root-node',ROOT.x,ROOT.y,'#426e60');
     root.setAttribute('aria-label','History of the neuron: expand main research paths');
+    root.setAttribute('role','button');root.tabIndex=0;
     const k=el('span','node-kicker','THE ROOT OF THE STORY');
     const h=el('h2','root-title','History of the Neuron');
     const p=el('p','root-description','From ancient questions to the modern electrical cell.');
@@ -107,18 +108,25 @@
     const trigger=button('expand-button primary-expand',branchesOpen?'−':'＋',()=>{branchesOpen=!branchesOpen;if(!branchesOpen)eras.forEach(era=>visible[era.id]=0);render();if(branchesOpen)centerOn(640,ROOT.y+90,.71);else centerOn(ROOT.x+ROOT.w/2,ROOT.y+ROOT.h/2,.98);});
     trigger.setAttribute('aria-label',branchesOpen?'Collapse all research paths':'Reveal the six research paths');
     trigger.setAttribute('aria-expanded',String(branchesOpen));bottom.append(trigger);
-    root.append(k,h,p,bottom);nodeLayer.append(root);
+    root.append(k,h,p,bottom);
+    root.addEventListener('click',e=>{if(!e.target.closest('button'))trigger.click();});
+    root.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();trigger.click();}});
+    nodeLayer.append(root);
     if(branchesOpen) {
       eras.forEach((era,i)=>{
         const y=trackY(i),selected=activePath===era.id, count=visible[era.id], list=sorted.get(era.id);
         arc(ROOT.x+ROOT.w,ROOT.y+ROOT.h/2,BX,y+BH/2,'main-link',era.color);
         const b=card('branch-node'+(selected?' selected':''),BX,y,era.color);
+        b.tabIndex=0;b.setAttribute('role','button');b.setAttribute('aria-label','Toggle '+names[era.id]);
         const top=el('div','branch-top');top.append(el('span','branch-number','PATH '+String(i+1).padStart(2,'0')),el('span','branch-years',era.range));
         b.append(top,el('h3','branch-name',names[era.id]),el('p','branch-description',blurbs[era.id]));
         const base=el('div','branch-bottom');base.append(el('span','node-count',count+' / '+list.length+' MILESTONES'));
         const control=button('expand-button',count?'−':'＋',()=>toggleBranch(era.id));
         control.setAttribute('aria-expanded',String(count>0));control.setAttribute('aria-label',(count?'Collapse ':'Expand ')+names[era.id]);
-        base.append(control);b.append(base);nodeLayer.append(b);
+        base.append(control);b.append(base);
+        b.addEventListener('click',e=>{if(!e.target.closest('button'))control.click();});
+        b.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();control.click();}});
+        nodeLayer.append(b);
         if(!count)return;
         for(let n=0;n<count;n++){
           const event=list[n],x=eventX(n),last=n===count-1;
@@ -140,6 +148,7 @@
           const foot=el('div','event-bottom');foot.append(el('span','event-person',event.person),el('span','event-read','READ STORY ↗'));
           e.append(foot);
           if(last&&count<list.length){
+            e.classList.add('has-next');
             const more=button('continue-node','＋',()=>revealNext(era.id));
             more.setAttribute('aria-label','Reveal next milestone after '+event.date);
             more.title='Reveal the next milestone';
@@ -350,7 +359,10 @@
   document.getElementById('resetButton').addEventListener('click',()=>{eras.forEach(e=>visible[e.id]=0);branchesOpen=false;activePath=null;render();centerOn(ROOT.x+ROOT.w/2,ROOT.y+ROOT.h/2,.98);});
   document.getElementById('termsToggle').addEventListener('change',e=>{showTerms=e.target.checked;render();});
   document.getElementById('closeStory').addEventListener('click',()=>closeStory());
-  modal.addEventListener('click',e=>{if(e.target===modal||e.target.closest('[data-dismiss]'))closeStory();const linked=e.target.closest('[data-event], [data-term]');if(linked){const type=linked.dataset.event?'event':'term',id=linked.dataset.event||linked.dataset.term;openStory(type,id);}});
+  modal.addEventListener('click',e=>{
+    const jump=e.target.closest('.story-nav a');
+    if(jump){e.preventDefault();document.getElementById('storyScroll').querySelector(jump.getAttribute('href'))?.scrollIntoView({behavior:'smooth',block:'start'});return;}
+    if(e.target===modal||e.target.closest('[data-dismiss]'))closeStory();const linked=e.target.closest('[data-event], [data-term]');if(linked){const type=linked.dataset.event?'event':'term',id=linked.dataset.event||linked.dataset.term;openStory(type,id);}});
   search.addEventListener('input',drawSearch);
   search.addEventListener('keydown',e=>{if(e.key==='Enter'){const first=searchMatches(search.value)[0];if(first){results.hidden=true;search.value='';jumpTo(first.type,first.item.id);}}if(e.key==='Escape'){results.hidden=true;search.blur();}});
   document.addEventListener('click',e=>{if(!e.target.closest('.search-area'))results.hidden=true;});

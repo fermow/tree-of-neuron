@@ -8,6 +8,7 @@
   <title>Tree of Neuron — Explore the history of discovery</title>
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="assets/explorer.css?v=20261015">
+  <link rel="stylesheet" href="assets/organic.css?v=20261015b">
 </head>
 <body>
   <a class="sr-only" href="#viewport">Skip to the interactive history</a>
@@ -17,7 +18,7 @@
       <span class="brand-name">tree of <b>neuron.</b><small class="brand-tag">AN ATLAS OF DISCOVERY</small></span>
     </a>
     <span class="header-divider" aria-hidden="true"></span>
-    <span class="header-note">An unfolding history of science</span>
+    <span class="header-note">Research, connected in time</span>
     <div class="search-area">
       <label class="search-box">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="10.5" cy="10.5" r="7"/><path d="m16 16 5 5"/></svg>
@@ -32,7 +33,7 @@
   <main class="canvas-app">
     <div id="viewport" class="canvas-viewport" role="region" aria-label="Interactive knowledge graph. Drag to pan; use the controls to zoom.">
       <div id="world" class="graph-world">
-        <svg id="edges" class="edge-layer" width="6500" height="2260" aria-hidden="true"></svg>
+        <svg id="edges" class="edge-layer" width="13800" height="13800" aria-hidden="true"></svg>
         <div id="nodes" class="node-layer"></div>
       </div>
     </div>
@@ -41,14 +42,40 @@
       <h2>Many paths.<br>One history.</h2>
       <p>Follow a research question. Open each discovery to see the evidence behind it.</p>
       <nav id="routeList" class="route-list" aria-label="Research branches"></nav>
+      <button id="journeyLaunch" type="button" class="journey-launch" aria-pressed="false">
+        <span class="journey-launch-icon" aria-hidden="true">↗</span>
+        <span><b>Start the guided journey</b><small>All 47 discoveries · chronological</small></span>
+      </button>
       <div class="route-bottom">
         <label class="term-switch"><input id="termsToggle" type="checkbox"> Show word origins</label>
+        <label class="term-switch"><input id="relationsToggle" type="checkbox" checked> Scientific connections</label>
+        <p class="relation-legend"><span class="legend-solid"></span> Documented links <span class="legend-dashed"></span> Complementary evidence</p>
         <p class="route-footnote">Solid lines follow a research thread. Dotted lines denote conceptual connections, not proven direct influence.</p>
       </div>
     </aside>
+    <aside id="journeyPanel" class="float-panel journey-panel" aria-label="Guided chronological journey" hidden>
+      <div class="journey-panel-head"><span class="panel-kicker">THE COMPLETE LEARNING ROUTE</span><button id="journeyExit" aria-label="Leave guided journey" type="button">×</button></div>
+      <div class="journey-step-count"><span id="journeyProgress">1 / 47</span><span id="journeyCategory">Ancient roots</span></div>
+      <progress id="journeyBar" max="47" value="1" aria-label="Jump to a historical discovery"></progress>
+      <span id="journeyDate" class="journey-date">c. 700 BCE</span>
+      <h3 id="journeyTitle">The first ideas</h3>
+      <p>Follow the global chronology, including overlapping research across branches. A gold dotted line marks your next stop—not a causal claim.</p>
+      <div class="journey-controls">
+        <button id="journeyPrevious" type="button" aria-label="Previous discovery">← Back</button>
+        <button id="journeyRead" type="button">Read research ↗</button>
+        <button id="journeyNext" type="button">Next discovery →</button>
+      </div>
+    </aside>
+    <aside id="relationInspector" class="float-panel relation-inspector" aria-label="Scientific relationship and evidence" hidden>
+      <div class="relation-head"><span id="relationKind">Research relationship</span><button id="relationClose" type="button" aria-label="Close relationship details">×</button></div>
+      <h3 id="relationNames">Two discoveries</h3>
+      <p id="relationNote"></p><small id="relationCertainty"></small>
+      <div id="relationSources" class="relation-sources"></div>
+      <div class="relation-navigate"><button id="relationFrom" type="button">Explore first ↗</button><button id="relationTo" type="button">Explore second ↗</button></div>
+    </aside>
     <div class="canvas-heading" aria-hidden="true">
       <span>THE LIVING NEURON ATLAS / 001</span>
-      <h1>A history you can <em>unfold.</em></h1>
+      <h1>One story. <em>Many branches.</em></h1>
       <p id="overviewText">One story. Six parallel paths.</p>
     </div>
     <div class="canvas-footer">
@@ -83,6 +110,8 @@
   <script src="assets/graph.js?v=20261010"></script>
   <script src="assets/visuals.js?v=20261010"></script>
   <script src="assets/media.js?v=20261010"></script>
-  <script src="assets/explorer.js?v=20261015"></script>
+  <script src="assets/organic-layout.js?v=20261015b"></script>
+  <script src="assets/relations.js?v=20261015b"></script>
+  <script src="assets/explorer.js?v=20261015b"></script>
 </body>
 </html>

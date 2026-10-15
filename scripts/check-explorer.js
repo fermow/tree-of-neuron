@@ -30,7 +30,7 @@ const context={
   },
   localStorage:{getItem(){return null;},setItem(){}},
   location:{pathname:'/tree-of-neuron/',search:'',hash:''},
-  history:{pushState(_a,_b,url){context.location.hash=url.includes('#')?url.slice(url.indexOf('#')):'';}},
+  history:{pushState(_a,_b,url){context.location.hash=url.includes('#')?url.slice(url.indexOf('#')):'';},replaceState(_a,_b,url){context.location.hash=url.includes('#')?url.slice(url.indexOf('#')):'';}},
   URLSearchParams,setTimeout:fn=>fn()
 };
 for (const file of ['data','research','terms','graph','visuals','media','explorer']) {

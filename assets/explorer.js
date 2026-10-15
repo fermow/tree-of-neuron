@@ -300,13 +300,17 @@
     return '<figure class="story-figure"><div class="story-image-frame"><img src="'+esc(mediaAPI.url(media,1100))+'" alt="'+esc(media.caption)+'" referrerpolicy="no-referrer"><span class="media-fallback">Image unavailable · use the source link below</span></div><figcaption><b>'+esc(media.type)+'</b><span>'+esc(media.caption)+'</span><a href="'+esc(safeUrl(mediaAPI.source(media)))+'" target="_blank" rel="noopener noreferrer">Image provenance & reuse terms ↗</a><small>'+esc(media.credit)+'</small></figcaption></figure>';
   }
   function referencesFor(id) {
-    const all=[...knowledge.strands.flatMap(s=>s.links),...knowledge.bridges,...knowledge.fork.branches.map(from=>[from,knowledge.fork.join])];
-    const set=new Map();
-    all.forEach(([a,b])=>{if(a===id&&eventsById.has(b))set.set(b,eventsById.get(b));if(b===id&&eventsById.has(a))set.set(a,eventsById.get(a));});
-    return [...set.values()].slice(0,7);
+    return relations.filter(r=>r.from===id||r.to===id)
+      .map(r=>({...r,other:eventsById.get(r.from===id?r.to:r.from)}));
   }
-  function relatedHtml(events) {
-    return events.map(e=>'<button type="button" class="related-link" data-event="'+esc(e.id)+'"><small>'+esc(e.date)+' · '+esc(e.person)+'</small><span>'+esc(e.title)+' <b>↗</b></span></button>').join('');
+  function relatedHtml(items) {
+    return items.map(r=>
+      '<div class="relation-story-card"><small>'+esc(relationKinds[r.type]||r.type)+' · '+esc(r.confidence)+'</small>'+
+      '<button type="button" class="related-link" data-event="'+esc(r.other.id)+'"><span>'+esc(r.other.date)+' · '+esc(r.other.title)+' ↗</span></button>'+
+      '<p>'+esc(r.note)+'</p>'+
+      '<div class="relation-story-sources">'+r.sources.map((url,i)=>
+        '<a target="_blank" rel="noopener noreferrer" href="'+esc(safeUrl(url))+'">Research source '+(i+1)+' ↗</a>').join('')+'</div></div>'
+    ).join('');
   }
   function eventHtml(event) {
     const r=research[event.id];
@@ -335,7 +339,7 @@
       (r?'<div class="caution-box"><b>EVIDENCE NOTE</b><p>'+esc(r.strength)+'</p><p>'+esc(r.caution)+'</p></div>':'')+
       '<div class="next-question"><small>THE NEXT QUESTION</small><p>'+esc(event.next)+'</p></div></section>'+
       (relatedTerms.length?'<section class="story-section"><span class="chapter-index">LANGUAGE HISTORY</span><h3>The words behind the discovery</h3><div class="related-grid">'+relatedTerms.map(t=>'<button class="related-link" data-term="'+esc(t.id)+'"><small>'+esc(t.date)+'</small><span>'+esc(t.word)+' ↗</span></button>').join('')+'</div></section>':'')+
-      (relatives.length?'<section class="story-section"><span class="chapter-index">CONNECTED INQUIRIES</span><h3>Follow the scientific question</h3><p class="detail-aside">These links mean related ideas or evidence, not necessarily direct personal influence.</p><div class="related-grid">'+relatedHtml(relatives)+'</div></section>':'')+
+      (relatives.length?'<section class="story-section"><span class="chapter-index">CONNECTED INQUIRIES</span><h3>Follow the scientific question</h3><p class="detail-aside">Each link identifies its scientific relationship, evidence and source. Complementary evidence does not imply direct influence.</p><div class="related-grid">'+relatedHtml(relatives)+'</div></section>':'')+
       '<section class="story-section" id="story-sources"><span class="chapter-index">04 / SOURCE TRAIL</span><h3>Research references</h3><p class="detail-aside">References are attached to this specific milestone. Open the original publications or historical scholarship to evaluate the claim; a link alone is not proof of independent fact-checking.</p>'+
       (r?'<p class="source-note">Editorial reading notes: '+esc(r.source)+'</p>':'')+
       '<ol class="citations">'+refs+'</ol></section></div>';
@@ -403,12 +407,16 @@
     });
   }
   viewport.addEventListener('wheel',e=>{
-    e.preventDefault();if(e.ctrlKey||e.metaKey){zoomAt(Math.exp(-e.deltaY*.005),e.clientX,e.clientY);}
-    else if(e.shiftKey){camera.x-=e.deltaY;transform();}
-    else {camera.x-=e.deltaX;camera.y-=e.deltaY;transform();}
+    e.preventDefault();
+    if(e.ctrlKey||e.metaKey)zoomAt(Math.exp(-e.deltaY*.0032),e.clientX,e.clientY,true);
+    else {
+      const factor=e.deltaMode===1?15:e.deltaMode===2?100:1;
+      if(e.shiftKey){camera.x-=e.deltaY*factor;transform();}
+      else {camera.x-=e.deltaX*factor;camera.y-=e.deltaY*factor;transform();}
+    }
   },{passive:false});
   viewport.addEventListener('pointerdown',e=>{
-    if(e.target.closest('button, .root-node, .branch-node, .event-node, .term-node, a, input'))return;
+    if(e.target.closest('button, .root-node, .branch-node, .event-node, .term-node, a, input, .scientific-link'))return;
     viewport.setPointerCapture(e.pointerId);pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
     if(pointers.size===1)pointerStart={x:e.clientX,y:e.clientY,camX:camera.x,camY:camera.y};
     if(pointers.size===2){const p=[...pointers.values()];pinch={dist:Math.hypot(p[0].x-p[1].x,p[0].y-p[1].y),scale:camera.scale};pointerStart=null;}
@@ -416,7 +424,7 @@
   });
   viewport.addEventListener('pointermove',e=>{
     if(!pointers.has(e.pointerId))return;pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
-    if(pointers.size===2&&pinch){const p=[...pointers.values()],dist=Math.hypot(p[0].x-p[1].x,p[0].y-p[1].y);const mx=(p[0].x+p[1].x)/2,my=(p[0].y+p[1].y)/2;zoomAt((pinch.scale*dist/Math.max(1,pinch.dist))/camera.scale,mx,my);}
+    if(pointers.size===2&&pinch){const p=[...pointers.values()],dist=Math.hypot(p[0].x-p[1].x,p[0].y-p[1].y);const mx=(p[0].x+p[1].x)/2,my=(p[0].y+p[1].y)/2;zoomAt((pinch.scale*dist/Math.max(1,pinch.dist))/camera.scale,mx,my,false);}
     else if(pointerStart){camera.x=pointerStart.camX+e.clientX-pointerStart.x;camera.y=pointerStart.camY+e.clientY-pointerStart.y;transform();}
   });
   function pointerEnd(e){pointers.delete(e.pointerId);if(pointers.size===0){pointerStart=null;pinch=null;viewport.classList.remove('dragging');}else{pointerStart=null;pinch=null;}}
@@ -424,9 +432,17 @@
   document.getElementById('zoomIn').addEventListener('click',()=>{const r=viewport.getBoundingClientRect();zoomAt(1.2,r.left+r.width/2,r.top+r.height/2);});
   document.getElementById('zoomOut').addEventListener('click',()=>{const r=viewport.getBoundingClientRect();zoomAt(1/1.2,r.left+r.width/2,r.top+r.height/2);});
   document.getElementById('fitView').addEventListener('click',fit);
-  document.getElementById('startButton').addEventListener('click',()=>{if(!branchesOpen){branchesOpen=true;render();}centerOn(660,ROOT.y+95,.71);});
-  document.getElementById('resetButton').addEventListener('click',()=>{eras.forEach(e=>visible[e.id]=0);branchesOpen=false;activePath=null;render();centerOn(ROOT.x+ROOT.w/2,ROOT.y+ROOT.h/2,.98);});
+  document.getElementById('startButton').addEventListener('click',()=>{if(!branchesOpen){branchesOpen=true;render();}centerOn(L.CENTER.x,L.CENTER.y,.62);});
+  document.getElementById('resetButton').addEventListener('click',()=>{eras.forEach(e=>visible[e.id]=0);branchesOpen=false;activePath=null;journeyIndex=-1;selectedRelationId=null;relationInspector.hidden=true;updateJourney();render();centerOn(L.CENTER.x,L.CENTER.y,.94);});
   document.getElementById('termsToggle').addEventListener('change',e=>{showTerms=e.target.checked;render();});
+  document.getElementById('journeyLaunch').addEventListener('click',()=>journeyGo(0));
+  document.getElementById('journeyPrevious').addEventListener('click',()=>journeyGo(journeyIndex-1));
+  document.getElementById('journeyNext').addEventListener('click',()=>journeyGo(journeyIndex+1));
+  document.getElementById('journeyRead').addEventListener('click',()=>{if(journeyIndex>=0)openStory('event',chronological[journeyIndex].id);});
+  document.getElementById('journeyExit').addEventListener('click',()=>{journeyIndex=-1;updateJourney();render();});
+  document.getElementById('journeyBar').addEventListener('input',e=>journeyGo(Number(e.target.value)-1));
+  document.getElementById('relationsToggle').addEventListener('change',e=>{showRelations=e.target.checked;render();});
+  document.getElementById('relationClose').addEventListener('click',()=>{relationInspector.hidden=true;selectedRelationId=null;render();});
   document.getElementById('closeStory').addEventListener('click',()=>closeStory());
   modal.addEventListener('click',e=>{
     const jump=e.target.closest('.story-nav a');
@@ -440,12 +456,14 @@
     if(!modal.hidden)return;
     if(e.key==='/'&&document.activeElement!==search){e.preventDefault();search.focus();return;}
     if(e.target.matches('input, textarea'))return;
+    if(journeyIndex>=0 && e.key==='ArrowRight'){e.preventDefault();journeyGo(journeyIndex+1);}
+    if(journeyIndex>=0 && e.key==='ArrowLeft'){e.preventDefault();journeyGo(journeyIndex-1);}
     if(e.key==='+'||e.key==='='){const r=viewport.getBoundingClientRect();zoomAt(1.18,r.left+r.width/2,r.top+r.height/2);}
     if(e.key==='-'){const r=viewport.getBoundingClientRect();zoomAt(1/1.18,r.left+r.width/2,r.top+r.height/2);}
   });
   window.addEventListener('popstate',syncHash);window.addEventListener('hashchange',syncHash);
-  window.addEventListener('resize',()=>{if(!branchesOpen)centerOn(ROOT.x+ROOT.w/2,ROOT.y+ROOT.h/2,.95,false);});
+  window.addEventListener('resize',()=>{if(!branchesOpen)centerOn(L.CENTER.x,L.CENTER.y,.9,false);});
   edgeLayer.setAttribute('width',String(worldWidth));edgeLayer.setAttribute('height',String(worldHeight));
   world.style.width=worldWidth+'px';world.style.height=worldHeight+'px';
-  render();centerOn(ROOT.x+ROOT.w/2,ROOT.y+ROOT.h/2,.95,false);syncHash();
+  render();updateJourney();centerOn(L.CENTER.x,L.CENTER.y,.88,false);syncHash();
 })();

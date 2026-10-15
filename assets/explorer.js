@@ -257,6 +257,15 @@
     document.getElementById('journeyCategory').textContent=names[e.era];
     document.getElementById('journeyDate').textContent=e.date;
     document.getElementById('journeyTitle').textContent=e.title;
+    const earlier=new Set(chronological.slice(0,journeyIndex).map(p=>p.id));
+    const links=relations.filter(r=>(r.to===e.id&&earlier.has(r.from)) || (r.type==='complemented'&&r.from===e.id&&earlier.has(r.to)));
+    const link=links.find(r=>r.confidence==='documented')||links[0];
+    document.getElementById('journeyEvidence').textContent=link?
+      (relationKinds[link.type]||'Related inquiry')+': '+link.note:
+      'Chronological transition: this research may overlap other branches. No direct scientific influence is asserted.';
+    const linkOut=document.getElementById('journeyEvidenceLink');
+    linkOut.hidden=!link;
+    if(link)linkOut.href=link.sources[0];
     document.getElementById('journeyBar').value=journeyIndex+1;
     document.getElementById('journeyPrevious').disabled=journeyIndex===0;
     document.getElementById('journeyNext').disabled=journeyIndex===chronological.length-1;
@@ -266,7 +275,9 @@
     if(index<0||index>=chronological.length)return;
     journeyIndex=index;const e=chronological[index];
     branchesOpen=true;activePath=e.era;
-    visible[e.era]=Math.max(visible[e.era],sorted.get(e.era).findIndex(n=>n.id===e.id)+1);
+    chronological.slice(0,index+1).forEach(step=>{
+      visible[step.era]=Math.max(visible[step.era],sorted.get(step.era).findIndex(n=>n.id===step.id)+1);
+    });
     render();updateJourney();focusRect(eventRect(e),.91);
   }
   function showRelation(relation){

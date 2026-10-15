@@ -16,7 +16,7 @@
   const blurbs = {roots:'Where did the concept of the nerve begin?',anatomy:'How did anatomy reveal its structure?',electricity:'What makes nerves and muscles respond?',cell:'How did separate neurons become visible?',myelin:'How do impulses travel so quickly?',ions:'What produces the electrical spike?'};
   const ROW = 314, FIRST_Y = 170, ROOT = {x:120,y:FIRST_Y+ROW*2.5-85,w:304,h:184};
   const BX = 620, BW = 286, BH = 163, EX = 1040, EW = 292, EH = 180, STEP = 352;
-  const worldWidth = 20500, worldHeight = 2260;
+  const worldWidth = 6500, worldHeight = 2260;
   const viewport = document.getElementById('viewport');
   const world = document.getElementById('world');
   const edgeLayer = document.getElementById('edges');

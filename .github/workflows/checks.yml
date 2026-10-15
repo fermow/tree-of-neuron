@@ -21,3 +21,17 @@ jobs:
           node-version: '22'
       - name: Validate historical content and graph interactions
         run: make check
+      - name: Browser smoke — desktop and mobile
+        run: |
+          npm install --no-save --package-lock=false playwright-core@1.56.0
+          command -v google-chrome
+          python3 -m http.server 8989 --bind 127.0.0.1 >/tmp/neuron-http.log 2>&1 &
+          sleep 2
+          node scripts/check-browser.js
+      - name: Upload visual QA screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: graph-desktop-mobile-screenshots
+          path: screenshots/
+          if-no-files-found: ignore

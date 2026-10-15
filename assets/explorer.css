@@ -32,7 +32,7 @@ a{color:inherit}button{color:inherit}
 .graph-node:before{content:"";height:4px;position:absolute;top:-1px;left:17px;right:17px;background:var(--node-accent);border-radius:0 0 6px 6px;opacity:.9}
 .graph-node h2,.graph-node h3,.graph-node h4,.graph-node p{overflow-wrap:anywhere}
 .graph-node p{text-align:justify;text-justify:inter-word;hyphens:auto}
-.root-node{width:304px;height:184px;padding:23px 25px 17px;border-radius:19px;box-shadow:0 22px 66px rgba(43,76,55,.15);border-color:#bdcfc1;cursor:pointer}
+.root-node{width:304px;height:220px;padding:23px 25px 17px;border-radius:19px;box-shadow:0 22px 66px rgba(43,76,55,.15);border-color:#bdcfc1;cursor:pointer}
 .node-kicker{display:block;font-size:9px;color:var(--green);font-weight:700;letter-spacing:1.7px;margin-bottom:11px}
 .root-title{font:normal 31px/.98 'DM Serif Display',Georgia,serif;letter-spacing:-.5px;margin:0 0 10px}
 .root-description{font-size:11px;line-height:1.6;color:#78837b;margin:0;width:220px}

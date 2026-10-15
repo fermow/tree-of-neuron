@@ -52,7 +52,7 @@ for (const term of terminology.items) {
   const root = { innerHTML: "" };
   const back = { href: "" };
   const page = {
-    window: { NEURON_HISTORY: context.window.NEURON_HISTORY, NEURON_TERMS: terminology, location: { search: `?id=${encodeURIComponent(term.id)}` } },
+    window: { NEURON_HISTORY: context.window.NEURON_HISTORY, NEURON_TERMS: terminology, NEURON_MEDIA: context.window.NEURON_MEDIA, location: { search: `?id=${encodeURIComponent(term.id)}` } },
     document: { getElementById: name => name === "termBack" ? back : root, documentElement: { style: { setProperty() {} } }, title: "" },
     URLSearchParams
   };

@@ -232,3 +232,7 @@ html,body{background:#09121a;color:var(--ink);text-rendering:optimizeLegibility;
  .story-top,.story-contents{background:#0f242b}
 }
 @media(prefers-reduced-motion:reduce){.graph-world{transition:none!important}}
+
+.journey-panel .journey-evidence{background:#203b38;border:1px solid #436f61;border-radius:8px;padding:11px 12px;color:#d2e7d9;line-height:1.55;font-size:10px;margin:0 0 8px;text-align:justify}
+.journey-evidence-link{display:inline-block;color:#a6e7c2;font-size:10px;font-weight:700;margin-bottom:13px;text-underline-offset:3px}
+.journey-evidence-link:hover{color:#e3fbe9}

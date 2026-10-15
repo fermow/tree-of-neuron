@@ -339,7 +339,7 @@
     else {camera.x-=e.deltaX;camera.y-=e.deltaY;transform();}
   },{passive:false});
   viewport.addEventListener('pointerdown',e=>{
-    if(e.target.closest('button, .event-node, .term-node, a, input'))return;
+    if(e.target.closest('button, .root-node, .branch-node, .event-node, .term-node, a, input'))return;
     viewport.setPointerCapture(e.pointerId);pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
     if(pointers.size===1)pointerStart={x:e.clientX,y:e.clientY,camX:camera.x,camY:camera.y};
     if(pointers.size===2){const p=[...pointers.values()];pinch={dist:Math.hypot(p[0].x-p[1].x,p[0].y-p[1].y),scale:camera.scale};pointerStart=null;}

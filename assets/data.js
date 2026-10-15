@@ -69,7 +69,7 @@ window.NEURON_HISTORY = {
   },
   events: [
     {
-      id: "word-before-cell", sort: -700, date: "c. 700 BCE-17th century", person: "Greek, Latin & medical traditions", era: "roots",
+      id: "word-before-cell", sort: -700, date: "c. 700 BCE–1891", person: "Greek, Latin & medical traditions", era: "roots",
       title: "The word existed before the neuron",
       summary: "Neûron meant sinew, tendon, cord, or bowstring long before it meant a nerve cell.",
       question: "Why was the structure called a nerve, and where did neuron come from?",
